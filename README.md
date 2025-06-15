@@ -3,7 +3,7 @@
 
 [Watch the Demo on YouTube](https://youtu.be/uEKhhhaKklo?si=r-HZryddCLNA3tRM)
 
-[Try WebChat](https://webchat-production-12ce.up.railway.app/)
+[Try WebChat](https://webchat-production-4b3b.up.railway.app/)
 
 
 ---
