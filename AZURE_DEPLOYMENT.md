@@ -71,19 +71,39 @@ NODE_ENV=production
 - The app will restart automatically
 - For development, use Azure Key Vault for sensitive values
 
-### Step 4: Configure Startup Command (Optional)
+### Step 4: Configure Startup Command (CRITICAL)
 
 In Azure Portal → Configuration → **General settings** → **Startup Command**:
 
 ```bash
-npm run build && npm start
+./startup.sh
 ```
 
-Or use the Azure build process (recommended):
-1. Leave startup command as: `npm start`
-2. Ensure `SCM_DO_BUILD_DURING_DEPLOYMENT=true` is set in app settings
+**Important**: This custom startup script ensures:
+- The build directory exists before starting
+- Proper PATH configuration for Next.js CLI
+- Correct PORT binding for Azure
 
-### Step 5: Deploy Your Application
+### Step 5: Configure Build Settings (CRITICAL)
+
+In Azure Portal → **Configuration** → **Application settings**, add these settings:
+
+```
+SCM_DO_BUILD_DURING_DEPLOYMENT=true
+WEBSITE_NODE_DEFAULT_VERSION=~20
+PRE_BUILD_COMMAND=npm install
+BUILD_FLAGS=--production=false
+POST_BUILD_COMMAND=npm run build
+```
+
+**What these do**:
+- `SCM_DO_BUILD_DURING_DEPLOYMENT`: Enables build on deployment
+- `WEBSITE_NODE_DEFAULT_VERSION`: Uses Node 20
+- `PRE_BUILD_COMMAND`: Ensures all dependencies install
+- `BUILD_FLAGS`: Includes devDependencies (needed for build)
+- `POST_BUILD_COMMAND`: Builds Next.js app after deployment
+
+### Step 6: Deploy Your Application
 
 #### Option A: GitHub Actions (Recommended)
 
@@ -108,20 +128,7 @@ az webapp up --name <app-name> --resource-group <resource-group> --runtime "NODE
 2. Right-click your app folder
 3. Select "Deploy to Web App"
 
-### Step 6: Configure Build Settings
-
-In Azure Portal → **Configuration** → **Application settings**, add:
-
-```
-SCM_DO_BUILD_DURING_DEPLOYMENT=true
-WEBSITE_NODE_DEFAULT_VERSION=~20
-NPM_CONFIG_PRODUCTION=false
-```
-
-This ensures:
-- Azure builds your app during deployment
-- Uses Node 20
-- Installs devDependencies (needed for build)
+**After any deployment method**: Wait 3-5 minutes for the build to complete. Check deployment logs in Azure Portal → Deployment Center → Logs.
 
 ### Step 7: Database Setup
 
@@ -151,6 +158,31 @@ This ensures:
    ```
 
 ## Troubleshooting
+
+### Issue: "next: not found" error
+**This is your current issue!**
+
+**Solution**: 
+1. **Set Startup Command**:
+   - Azure Portal → Configuration → General settings
+   - Startup Command: `./startup.sh`
+   - Save and restart
+
+2. **Ensure Build Settings** (in Application settings):
+   ```
+   SCM_DO_BUILD_DURING_DEPLOYMENT=true
+   POST_BUILD_COMMAND=npm run build
+   BUILD_FLAGS=--production=false
+   ```
+
+3. **Give execute permission to startup.sh**:
+   - The startup.sh file should be committed with execute permissions
+   - Or set in Azure SSH: `chmod +x startup.sh`
+
+4. **Alternative**: If startup.sh doesn't work, use this Startup Command:
+   ```bash
+   npm run build && npm start
+   ```
 
 ### Issue: App shows default page
 **Solution**: 
