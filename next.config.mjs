@@ -9,7 +9,12 @@ const nextConfig = {
       },
     ],
   },
-  output: "export",
+  // Configure for dynamic server-side rendering (required for Socket.IO)
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+  },
 };
 
 export default nextConfig;
